@@ -5,7 +5,7 @@ const connectToDatabase = () => {
         host: 'localhost',
         user: 'root',
         password: 'jakin',
-        database: 'crpms'
+        database: 'CRPMS'
     });
 
     connection.connect((err) => {

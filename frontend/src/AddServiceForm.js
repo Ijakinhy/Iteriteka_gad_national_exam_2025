@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { addService } from './services';
+import axios  from  "axios"
 
 function AddServiceForm() {
   const [service, setService] = useState({
-    ServiceCode: '',
     ServiceName: '',
     ServicePrice: ''
   });
@@ -17,10 +16,7 @@ function AddServiceForm() {
     e.preventDefault();
     setMessage('');
     try {
-      await addService({
-        ...service,
-        ServicePrice: parseFloat(service.ServicePrice)
-      });
+       await axios.post('http://localhost:4001/services', service);
       setMessage('Service added successfully!');
       setService({ ServiceCode: '', ServiceName: '', ServicePrice: '' });
     } catch (err) {
@@ -36,17 +32,6 @@ function AddServiceForm() {
           {message}
         </div>
       )}
-      <div className="mb-3">
-        <label className="form-label">Service Code</label>
-        <input
-          type="text"
-          className="form-control"
-          name="ServiceCode"
-          value={service.ServiceCode}
-          onChange={handleChange}
-          required
-        />
-      </div>
       <div className="mb-3">
         <label className="form-label">Service Name</label>
         <input

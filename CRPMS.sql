@@ -14,14 +14,14 @@ CREATE TABLE Users (
 
 -- 1. Create Services Table
 CREATE TABLE Services (
-    ServiceCode VARCHAR(10) PRIMARY KEY,
+    ServiceCode INT(10) AUTO_INCREMENT PRIMARY KEY,
     ServiceName VARCHAR(100),
     ServicePrice DECIMAL(10,2)
 );
 
 -- 2. Create Car Table
 CREATE TABLE Car (
-    PlateNumber VARCHAR(15) PRIMARY KEY,
+    PlateNumber INT(15) AUTO_INCREMENT PRIMARY KEY,
     Type VARCHAR(50),
     Model VARCHAR(50),
     ManufacturingYear YEAR,
@@ -32,8 +32,8 @@ CREATE TABLE Car (
 -- 3. Create ServiceRecord Table
 CREATE TABLE ServiceRecord (
     RecordNumber INT AUTO_INCREMENT PRIMARY KEY,
-    PlateNumber VARCHAR(15),
-    ServiceCode VARCHAR(10),
+    PlateNumber INT(15),
+    ServiceCode INT(10),
     ServiceDate DATE,
     FOREIGN KEY (PlateNumber) REFERENCES Car(PlateNumber),
     FOREIGN KEY (ServiceCode) REFERENCES Services(ServiceCode)

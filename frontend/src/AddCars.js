@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-
-function AddCars({ onCarAdded }) {
+import axios from 'axios';
+function AddCars() {
   const [car, setCar] = useState({
-    PlateNumber: '',
     Type: '',
     Model: '',
     ManufacturingYear: '',
@@ -15,32 +14,26 @@ function AddCars({ onCarAdded }) {
     setCar({ ...car, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    try {
-      // Replace with your backend API call
-      const response = await fetch('http://localhost:3001/cars', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(car),
-      });
-      if (!response.ok) throw new Error('Failed to add car');
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setMessage('');
+  try {
+    const response = await axios.post('http://localhost:4001/cars', car);
       setMessage('Car added successfully!');
       setCar({
-        PlateNumber: '',
         Type: '',
         Model: '',
         ManufacturingYear: '',
         DriverPhone: '',
         MechanicName: ''
       });
-      if (onCarAdded) onCarAdded();
-    } catch (err) {
-      setMessage('Failed to add car');
-    }
-  };
-
+      console.log(response.data );
+      
+  } catch (err) {
+    console.error(err); // helpful to debug
+    setMessage('Failed to add car');
+  }
+};
   return (
     <form onSubmit={handleSubmit} className="mb-4 p-4 border rounded bg-light">
       <h3 className="mb-3">Add New Car</h3>
@@ -49,17 +42,6 @@ function AddCars({ onCarAdded }) {
           {message}
         </div>
       )}
-      <div className="mb-3">
-        <label className="form-label">Plate Number</label>
-        <input
-          type="text"
-          className="form-control"
-          name="PlateNumber"
-          value={car.PlateNumber}
-          onChange={handleChange}
-          required
-        />
-      </div>
       <div className="mb-3">
         <label className="form-label">Type</label>
         <input

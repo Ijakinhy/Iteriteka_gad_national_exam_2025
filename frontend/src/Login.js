@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Login({ onLogin }) {
+function Login() {
   const [form, setForm] = useState({ username: '', password: '' });
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
@@ -14,20 +14,18 @@ function Login({ onLogin }) {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await fetch('http://localhost:3001/login', {
+      const response = await fetch('http://localhost:4001/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(form),
       });
       const data = await response.json();
-      if (response.ok) {
+    console.log(data);
+    
         setMessage('Login successful!');
-        if (onLogin) onLogin(data);
+    
         setTimeout(() => navigate('/dashboard'), 1000); // Redirect after 1s
-      } else {
-        setMessage(data.error || 'Login failed');
-      }
     } catch {
       setMessage('Login failed');
     }
