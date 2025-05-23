@@ -12,19 +12,19 @@ app.use(express.json());
 
 // ✅ Correct CORS configuration
 app.use(cors({
-  origin: 'http://localhost:3000', // Must match frontend exactly
-  credentials: true                // Required to send cookies
+  origin: 'http://localhost:3000',
+  credentials: true                 
 }));
 
 // ✅ Proper session setup
 app.use(session({
-  secret: 'jakin',       // Replace with strong secret in production
+  secret: 'jakin',       
   resave: false,
-  saveUninitialized: false, // Prevent creating empty sessions
+  saveUninitialized: false,  
   cookie: {
-    httpOnly: true,      // Prevents client-side JS access
-    secure: false,       // Set to `true` in production with HTTPS
-    sameSite: 'lax'      // Adjust if needed (e.g. 'none' with HTTPS)
+    httpOnly: true,      
+    secure: false,        
+    sameSite: 'lax'       
   }
 }));
 // MySQL connection
