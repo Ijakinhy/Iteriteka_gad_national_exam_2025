@@ -1,26 +1,39 @@
 import React, { useState, useEffect } from 'react';
 
-function ServiceRecord({ onRecordAdded }) {
+function ServiceRecord() {
   const [record, setRecord] = useState({
     PlateNumber: '',
     ServiceCode: '',
     ServiceDate: ''
   });
   const [message, setMessage] = useState('');
-  const [plateNumbers, setPlateNumbers] = useState([]);
-  const [serviceCodes, setServiceCodes] = useState([]);
+  const [cars, setCars] = useState([]);
+  const [services, setServices] = useState([]);
+
+  const fetchCarsAndServices = async () => {
+    try {
+      const carsResponse = await fetch('http://localhost:4001/cars');
+      const servicesResponse = await fetch('http://localhost:4001/services');
+      const carsData = await carsResponse.json();
+      const servicesData = await servicesResponse.json();
+      console.log(carsData);
+      if(carsResponse.ok && servicesResponse.ok) {
+        setCars(carsData);
+        setServices(servicesData)
+      }
+      if(servicesResponse.ok) {
+        const servicesData = await servicesResponse.json();
+        setServices(servicesData.map(service => service.ServiceCode));
+      }
+    }
+  catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   useEffect(() => {
-    // Fetch valid PlateNumbers from backend
-    fetch('http://localhost:3001/cars')
-      .then(res => res.json())
-      .then(data => setPlateNumbers(data.map(car => car.PlateNumber)))
-      .catch(() => setPlateNumbers([]));
-    // Fetch valid ServiceCodes from backend
-    fetch('http://localhost:3001/services')
-      .then(res => res.json())
-      .then(data => setServiceCodes(data.map(service => service.ServiceCode)))
-      .catch(() => setServiceCodes([]));
+    fetchCarsAndServices();
+    
   }, []);
 
   const handleChange = (e) => {
@@ -31,7 +44,7 @@ function ServiceRecord({ onRecordAdded }) {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await fetch('http://localhost:3001/servicerecords', {
+      const response = await fetch('http://localhost:4001/servicerecords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(record),
@@ -39,7 +52,7 @@ function ServiceRecord({ onRecordAdded }) {
       if (!response.ok) throw new Error('Failed to add service record');
       setMessage('Service record added successfully!');
       setRecord({ PlateNumber: '', ServiceCode: '', ServiceDate: '' });
-      if (onRecordAdded) onRecordAdded();
+
     } catch (err) {
       setMessage('Failed to add service record');
     }
@@ -63,8 +76,8 @@ function ServiceRecord({ onRecordAdded }) {
           required
         >
           <option value="">Select Plate Number</option>
-          {plateNumbers.map(pn => (
-            <option key={pn} value={pn}>{pn}</option>
+          {cars.map((car,index) => (
+            <option key={index} value={car.PlateNumber}>{`${car.PlateNumber}-${car.Type}`}</option>
           ))}
         </select>
       </div>
@@ -78,8 +91,8 @@ function ServiceRecord({ onRecordAdded }) {
           required
         >
           <option value="">Select Service Code</option>
-          {serviceCodes.map(sc => (
-            <option key={sc} value={sc}>{sc}</option>
+          {services.map((service,index) => (
+            <option key={index} value={service.ServiceCode}>{`${service.ServiceCode}-${service.ServiceName}`}</option>
           ))}
         </select>
       </div>
