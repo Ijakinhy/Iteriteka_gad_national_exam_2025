@@ -12,7 +12,7 @@ function OptPayments() {
 
   // Fetch all payments
   const fetchPayments = () => {
-    fetch('http://localhost:3001/payments')
+    fetch('http://localhost:4001/payments')
       .then(res => res.json())
       .then(data => setPayments(data))
       .catch(() => setPayments([]));
@@ -25,7 +25,7 @@ function OptPayments() {
   // Handle delete
   const handleDelete = (id) => {
     if (!window.confirm('Are you sure you want to delete this payment?')) return;
-    fetch(`http://localhost:3001/payments/${id}`, { method: 'DELETE' })
+    fetch(`http://localhost:4001/payments/${id}`, { method: 'DELETE' })
       .then(res => res.json())
       .then(() => {
         setMessage('Payment deleted successfully.');
@@ -48,7 +48,7 @@ function OptPayments() {
   // Handle update submit
   const handleUpdate = (e) => {
     e.preventDefault();
-    fetch(`http://localhost:3001/payments/${editId}`, {
+    fetch(`http://localhost:4001/payments/${editId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editPayment),

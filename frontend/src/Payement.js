@@ -7,14 +7,21 @@ function Payement({ onPaymentAdded }) {
     PaymentDate: ''
   });
   const [message, setMessage] = useState('');
-  const [recordNumbers, setRecordNumbers] = useState([]);
+  const [recordServices, setRecordServices] = useState([]);
+
+const fetchServiceRecords = async () => {
+  try {
+    const response = await fetch('http://localhost:4001/servicerecords');
+    const data = await response.json();
+    setRecordServices(data);
+  } catch (error) {
+    console.error('Error fetching service records:', error);
+  }
+};
+
 
   useEffect(() => {
-    // Fetch valid RecordNumbers from backend
-    fetch('http://localhost:3001/servicerecords')
-      .then(res => res.json())
-      .then(data => setRecordNumbers(data))
-      .catch(() => setRecordNumbers([]));
+    fetchServiceRecords();
   }, []);
 
   const handleChange = (e) => {
@@ -25,7 +32,7 @@ function Payement({ onPaymentAdded }) {
     e.preventDefault();
     setMessage('');
     try {
-      const response = await fetch('http://localhost:3001/payments', {
+      const response = await fetch('http://localhost:4001/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payment),
@@ -33,7 +40,6 @@ function Payement({ onPaymentAdded }) {
       if (!response.ok) throw new Error('Failed to add payment');
       setMessage('Payment added successfully!');
       setPayment({ RecordNumber: '', AmountPaid: '', PaymentDate: '' });
-      if (onPaymentAdded) onPaymentAdded();
     } catch (err) {
       setMessage('Failed to add payment');
     }
@@ -57,9 +63,9 @@ function Payement({ onPaymentAdded }) {
           required
         >
           <option value="">Select Record Number</option>
-          {recordNumbers.map(rn => (
-            <option key={rn.RecordNumber} value={rn.RecordNumber}>
-              {rn.RecordNumber}
+          {recordServices.map((recordService,index) => (
+            <option key={index} value={recordService.RecordNumber}>
+              {recordService.RecordNumber}
             </option>
           ))}
         </select>
