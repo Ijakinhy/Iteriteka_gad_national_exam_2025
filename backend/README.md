@@ -1,37 +1,22 @@
-# Node.js Database Connection
-
-This project demonstrates how to establish a connection to a database using Node.js. It includes a simple setup for connecting to a MySQL or PostgreSQL database.
-
 ## Prerequisites
 
-- Node.js installed on your machine.
-- A MySQL or PostgreSQL database server running.
+- make sure you have Node.js installed run `node -v` to check if you have node installed
+- start mysql server in xampp
 
-## Installation
+## Getting Started
 
-1. Clone the repository:
-
-   ```
-   git clone <repository-url>
-   ```
+1. create a database in mysql use the DATABASES.sql file
+   open CMD and then in mysql run: `source /your location/DATABASES.sql`
 
 2. Navigate to the project directory:
 
    ```
-   cd node-db-connection
+   cd backend
    ```
 
 3. Install the required dependencies:
 
-   For MySQL:
-   ```
-   npm install mysql
-   ```
-
-   For PostgreSQL:
-   ```
-   npm install pg
-   ```
+   For MySQL: `npm install`
 
 ## Usage
 
@@ -39,19 +24,12 @@ This project demonstrates how to establish a connection to a database using Node
 
    ```javascript
    const dbConfig = {
-       host: 'localhost',
-       user: 'your_username',
-       password: 'your_password',
-       database: 'your_database'
+     host: "localhost",
+     user: "your_username",
+     password: "your_password",
+     database: "your_database",
    };
    ```
 
-2. Run the application:
-
-   ```
-   node src/index.js
-   ```
-
-## License
-
-This project is licensed under the MIT License.
+2. Run the application using: `npm start`
+3. The application will establish a connection to the database and perform database operations.

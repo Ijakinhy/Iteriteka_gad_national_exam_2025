@@ -27,15 +27,21 @@ app.use(session({
     sameSite: 'lax'       
   }
 }));
+
 // MySQL connection
 const db = connectToDatabase(); 
 
-// Example route
+// Basic routes
+app.get('/', (req, res) => {
+    res.send('CRPMS backend is running!');
+});
+
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from backend!' });
 });
 
-// Register route
+
+// Auth routes
 app.post('/register', (req, res) => {
   const { username, password } = req.body;
 
@@ -50,31 +56,9 @@ app.post('/register', (req, res) => {
       if (err) {
         return res.status(400).json({ error: 'Username already exists' });
       }
-
       res.json({ message: 'Registered successfully' });
     }
   );
-});
-
-
-
-app.get('/', (req, res) => {
-    res.send('CRPMS backend is running!');
-});
-
-// Example route: get all services
-app.get('/services', (req, res) => {
-    db.query('SELECT * FROM Services', (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json(results);
-    });
-});
-
-
-app.post('/logout', (req, res) => {
-  req.session.destroy(() => res.json({ message: 'Logged out' }));
 });
 
 app.post('/login', (req, res) => {
@@ -92,9 +76,13 @@ app.post('/login', (req, res) => {
   });
 });
 
-// POST Car
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => res.json({ message: 'Logged out' }));
+});
+
+// Car routes
 app.post('/cars', (req, res) => {
-  const { Type, Model, ManufacturingYear, DriverPhone, MechanicName } = req.body;
+  const { Type, Model, ManufacturingYear, DriverPhone, MechanicName } = req.body;  
   if (!Type || !Model || !ManufacturingYear || !DriverPhone || !MechanicName) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
@@ -107,8 +95,6 @@ app.post('/cars', (req, res) => {
   });
 });
 
-
-// GET Cars
 app.get('/cars', (req, res) => {
   db.query('SELECT * FROM Car', (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch cars.' });
@@ -116,7 +102,7 @@ app.get('/cars', (req, res) => {
   });
 });
 
-// POST Service
+// Service routes
 app.post('/services', (req, res) => {
   const { ServiceName, ServicePrice } = req.body;
   if (!ServiceName || !ServicePrice) {
@@ -131,7 +117,6 @@ app.post('/services', (req, res) => {
   });
 });
 
-// GET Services
 app.get('/services', (req, res) => {
   db.query('SELECT * FROM Services', (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch services.' });
@@ -139,7 +124,7 @@ app.get('/services', (req, res) => {
   });
 });
 
-// POST Service Record
+// Service Record routes
 app.post('/servicerecords', (req, res) => {
   const { PlateNumber, ServiceCode, ServiceDate } = req.body;
   if (!PlateNumber || !ServiceCode || !ServiceDate) {
@@ -154,7 +139,6 @@ app.post('/servicerecords', (req, res) => {
   });
 });
 
-// GET Service Records
 app.get('/servicerecords', (req, res) => {
   db.query('SELECT * FROM ServiceRecord', (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch service records.' });
@@ -162,7 +146,7 @@ app.get('/servicerecords', (req, res) => {
   });
 });
 
-// POST Payment
+// Payment routes
 app.post('/payments', (req, res) => {
   const { RecordNumber, AmountPaid, PaymentDate } = req.body;
   if (!RecordNumber || !AmountPaid || !PaymentDate) {
@@ -177,7 +161,6 @@ app.post('/payments', (req, res) => {
   });
 });
 
-// GET Payments
 app.get('/payments', (req, res) => {
   db.query('SELECT * FROM Payment', (err, result) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch payments.' });
@@ -185,6 +168,44 @@ app.get('/payments', (req, res) => {
   });
 });
 
+// UPDATE a payment
+app.put('/payments/:id', (req, res) => {
+
+  
+  const { id } = req.params;
+  const { RecordNumber, AmountPaid, PaymentDate } = req.body;
+
+  if (!RecordNumber || !AmountPaid || !PaymentDate) {
+    return res.status(400).json({ error: 'All fields are required.' });
+  }
+
+  const sql = `UPDATE Payment SET RecordNumber = ?, AmountPaid = ?, PaymentDate = ? WHERE PaymentNumber = ?`;
+  db.query(sql, [RecordNumber, AmountPaid, PaymentDate, id], (err, result) => {
+    if (err) {
+      console.error('Error updating payment:', err);
+      return res.status(500).json({ error: 'Failed to update payment' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+    res.json({ message: 'Payment updated successfully' });
+  });
+});
+
+// DELETE a payment
+app.delete('/payments/:id', (req, res) => {
+  const { id } = req.params;
+  db.query('DELETE FROM Payment WHERE PaymentNumber = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting payment:', err);
+      return res.status(500).json({ error: 'Failed to delete payment' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+    res.json({ message: 'Payment deleted successfully' });
+  });
+});
 
 // Start server
 app.listen(PORT, () => {

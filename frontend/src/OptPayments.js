@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 function OptPayments() {
   const [payments, setPayments] = useState([]);
   const [editId, setEditId] = useState(null);
+  const [servicerecords, setRecordServices] = useState([]);
   const [editPayment, setEditPayment] = useState({
     RecordNumber: '',
     AmountPaid: '',
@@ -19,19 +20,42 @@ function OptPayments() {
   };
 
   useEffect(() => {
+    const fetchServiceRecords = async () => {
+      try {
+        const response = await fetch(`http://localhost:4001/servicerecords`);
+        const data = await response.json();
+        setRecordServices(data);
+      } catch (error) {
+        console.error('Error fetching service records:', error);
+      }
+    };
+
     fetchPayments();
+    fetchServiceRecords();
   }, []);
 
   // Handle delete
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this payment?')) return;
-    fetch(`http://localhost:4001/payments/${id}`, { method: 'DELETE' })
-      .then(res => res.json())
-      .then(() => {
+    
+    try {
+      const response = await fetch(`http://localhost:4001/payments/${id}`, { 
+        method: 'DELETE' 
+      });
+      
+      if (response.ok) {
         setMessage('Payment deleted successfully.');
         fetchPayments();
-      })
-      .catch(() => setMessage('Failed to delete payment.'));
+        // Clear message after 3 seconds
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.error || 'Failed to delete payment.');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setMessage('Failed to delete payment.');
+    }
   };
 
   // Handle edit
@@ -46,25 +70,38 @@ function OptPayments() {
   };
 
   // Handle update submit
-  const handleUpdate = (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    fetch(`http://localhost:4001/payments/${editId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editPayment),
-    })
-      .then(res => res.json())
-      .then(() => {
+    
+    try {
+      const response = await fetch(`http://localhost:4001/payments/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editPayment)
+      });
+      
+      if (response.ok) {
         setMessage('Payment updated successfully.');
         setEditId(null);
         fetchPayments();
-      })
-      .catch(() => setMessage('Failed to update payment.'));
+        // Clear message after 3 seconds
+        setTimeout(() => setMessage(''), 3000);
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.error || 'Failed to update payment.');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      setMessage('Failed to update payment.');
+    }
   };
 
-  // Handle edit input change
   const handleEditChange = (e) => {
-    setEditPayment({ ...editPayment, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setEditPayment({
+      ...editPayment,
+      [name]: name === 'RecordNumber' ? Number(value) : value
+    });
   };
 
   return (
@@ -91,13 +128,20 @@ function OptPayments() {
               <tr key={payment.PaymentNumber}>
                 <td>{payment.PaymentNumber}</td>
                 <td>
-                  <input
-                    type="number"
+                  <select
                     name="RecordNumber"
                     value={editPayment.RecordNumber}
                     onChange={handleEditChange}
+                    style={{ width: '100%', padding: '0.375rem 0.75rem' }}
                     className="form-control"
-                  />
+                  >
+                    <option value="">Select Record Number</option>
+                    {servicerecords.map(service => (
+                      <option key={service.RecordNumber} value={service.RecordNumber}>
+                        {service.RecordNumber}
+                      </option>
+                    ))}
+                  </select>
                 </td>
                 <td>
                   <input
@@ -127,7 +171,7 @@ function OptPayments() {
               <tr key={payment.PaymentNumber}>
                 <td>{payment.PaymentNumber}</td>
                 <td>{payment.RecordNumber}</td>
-                <td>{payment.AmountPaid}</td>
+                <td>${payment.AmountPaid}</td>
                 <td>{payment.PaymentDate ? payment.PaymentDate.slice(0, 10) : ''}</td>
                 <td>
                   <button className="btn btn-primary btn-sm me-2" onClick={() => handleEdit(payment)}>Edit</button>
